@@ -1,0 +1,12 @@
+//@version=4
+
+study("AmirGhaemi", shorttitle="open-sourced-iBsV2", overlay=true)
+
+input_color = #131722
+
+// Function to check if a candle is an inside bar
+is_inside_bar() =>
+    high < high[1] and low > low[1]
+
+// Plot bar colors
+barcolor(is_inside_bar() ? input_color : na)
