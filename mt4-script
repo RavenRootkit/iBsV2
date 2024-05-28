@@ -1,0 +1,77 @@
+//+------------------------------------------------------------------+
+//|                                                   InsideBar.mq4  |
+//|                        Copyright 2024, MetaQuotes Software Corp. |
+//|                                             https://www.mql5.com |
+//+------------------------------------------------------------------+
+#property strict
+#property indicator_chart_window
+
+// Input parameters
+input color InsideBarColor = 0x131722; // Custom color #131722 (RGB)
+
+// Indicator buffers
+double Buffer[];
+
+//+------------------------------------------------------------------+
+//| Custom indicator initialization function                         |
+//+------------------------------------------------------------------+
+int OnInit()
+  {
+   // Set the indicator buffers
+   SetIndexBuffer(0, Buffer);
+   
+   // Set the colors
+   SetIndexStyle(0, DRAW_ARROW, EMPTY, 1, InsideBarColor);
+   SetIndexArrow(0, 233); // ASCII code for the arrow symbol
+   
+   return(INIT_SUCCEEDED);
+  }
+//+------------------------------------------------------------------+
+//| Custom indicator iteration function                              |
+//+------------------------------------------------------------------+
+int OnCalculate(const int rates_total,
+                const int prev_calculated,
+                const datetime &time[],
+                const double &open[],
+                const double &high[],
+                const double &low[],
+                const double &close[],
+                const long &tick_volume[],
+                const long &volume[],
+                const int &spread[])
+  {
+   int limit = rates_total - prev_calculated;
+   if (prev_calculated > 0) limit++;
+   
+   for (int i = limit; i >= 1; i--)
+     {
+      int pos = rates_total - i;
+      // Check if the current bar is an inside bar
+      if (high[pos] < high[pos + 1] && low[pos] > low[pos + 1])
+        {
+         Buffer[pos] = low[pos] - (Point * 2); // Place the arrow below the low
+        }
+      else
+        {
+         Buffer[pos] = EMPTY_VALUE; // No arrow
+        }
+
+      // Draw custom candle bodies with the specified color
+      string name = "CandleBody" + IntegerToString(pos);
+      if (ObjectFind(0, name) != 0)
+        {
+         ObjectCreate(0, name, OBJ_RECTANGLE, 0, time[pos], open[pos], time[pos+1], close[pos]);
+         ObjectSetInteger(0, name, OBJPROP_COLOR, CandleBodyColor);
+         ObjectSetInteger(0, name, OBJPROP_WIDTH, 1);
+         ObjectSetInteger(0, name, OBJPROP_STYLE, STYLE_SOLID);
+         ObjectSetInteger(0, name, OBJPROP_BACK, true);
+        }
+      else
+        {
+         ObjectMove(0, name, 0, time[pos], open[pos]);
+         ObjectMove(0, name, 1, time[pos+1], close[pos]);
+        }
+     }
+   return(rates_total);
+  }
+//+------------------------------------------------------------------+
