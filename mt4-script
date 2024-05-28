@@ -7,7 +7,7 @@
 #property indicator_chart_window
 
 // Input parameters
-input color InsideBarColor = 0x131722; // Custom color #131722 (RGB)
+input color InsideBarColor = 0x131722; // Custom color #131722
 
 // Indicator buffers
 double Buffer[];
@@ -54,22 +54,6 @@ int OnCalculate(const int rates_total,
       else
         {
          Buffer[pos] = EMPTY_VALUE; // No arrow
-        }
-
-      // Draw custom candle bodies with the specified color
-      string name = "CandleBody" + IntegerToString(pos);
-      if (ObjectFind(0, name) != 0)
-        {
-         ObjectCreate(0, name, OBJ_RECTANGLE, 0, time[pos], open[pos], time[pos+1], close[pos]);
-         ObjectSetInteger(0, name, OBJPROP_COLOR, CandleBodyColor);
-         ObjectSetInteger(0, name, OBJPROP_WIDTH, 1);
-         ObjectSetInteger(0, name, OBJPROP_STYLE, STYLE_SOLID);
-         ObjectSetInteger(0, name, OBJPROP_BACK, true);
-        }
-      else
-        {
-         ObjectMove(0, name, 0, time[pos], open[pos]);
-         ObjectMove(0, name, 1, time[pos+1], close[pos]);
         }
      }
    return(rates_total);
