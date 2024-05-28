@@ -5,12 +5,16 @@
 //+------------------------------------------------------------------+
 #property strict
 #property indicator_chart_window
+#property indicator_buffers 2
+#property indicator_color1 clrNONE
 
 // Input parameters
 input color InsideBarColor = 0x131722; // Custom color #131722
 
 // Indicator buffers
-double Buffer[];
+double ColorOpenBuffer[];
+double ColorCloseBuffer[];
+double ColorBuffer[];
 
 //+------------------------------------------------------------------+
 //| Custom indicator initialization function                         |
@@ -18,11 +22,17 @@ double Buffer[];
 int OnInit()
   {
    // Set the indicator buffers
-   SetIndexBuffer(0, Buffer);
-   
-   // Set the colors
-   SetIndexStyle(0, DRAW_ARROW, EMPTY, 1, InsideBarColor);
-   SetIndexArrow(0, 233); // ASCII code for the arrow symbol
+   SetIndexBuffer(0, ColorOpenBuffer);
+   SetIndexBuffer(1, ColorCloseBuffer);
+   SetIndexBuffer(2, ColorBuffer);
+
+   // Set the indicator styles
+   SetIndexStyle(0, DRAW_COLOR_SECTION);
+   SetIndexStyle(1, DRAW_COLOR_SECTION);
+   SetIndexLabel(0, "ColorOpen");
+   SetIndexLabel(1, "ColorClose");
+
+   IndicatorShortName("InsideBar");
    
    return(INIT_SUCCEEDED);
   }
@@ -46,14 +56,20 @@ int OnCalculate(const int rates_total,
    for (int i = limit; i >= 1; i--)
      {
       int pos = rates_total - i;
+
       // Check if the current bar is an inside bar
       if (high[pos] < high[pos + 1] && low[pos] > low[pos + 1])
         {
-         Buffer[pos] = low[pos] - (Point * 2); // Place the arrow below the low
+         // Change the color of the inside bar candle body
+         ColorOpenBuffer[pos] = open[pos];
+         ColorCloseBuffer[pos] = close[pos];
+         ColorBuffer[pos] = InsideBarColor;
         }
       else
         {
-         Buffer[pos] = EMPTY_VALUE; // No arrow
+         ColorOpenBuffer[pos] = EMPTY_VALUE;
+         ColorCloseBuffer[pos] = EMPTY_VALUE;
+         ColorBuffer[pos] = clrNONE; // No color change
         }
      }
    return(rates_total);
